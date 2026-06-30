@@ -1,9 +1,9 @@
 [submodule "backend"]
 	path = backend
-	url = https://github.com/NidaKayani/QuantumChat-Backend.git
+	url = https://github.com/QuantumLogicsLabs/QuantumChat-Backend.git
 	branch = main
 [submodule "frontend"]
 	path = frontend
-	url = https://github.com/NidaKayani/QuantumChat-Frontend.git
+	url = https://github.com/QuantumLogicsLabs/QuantumChat-Frontend.git
 	branch = main
 
