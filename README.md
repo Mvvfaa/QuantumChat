@@ -2,7 +2,7 @@
 
 A MERN messaging app with real end-to-end encryption. Every account gets a **pool of 5 X25519 keypairs**: public halves live in MongoDB, private halves never leave the browser. Messages and file attachments are sealed client-side with [`tweetnacl`](https://github.com/dchest/tweetnacl-js)'s `nacl.box` (Curve25519-XSalsa20-Poly1305) — the server only ever stores and relays ciphertext.
 
-See also: [`backend/README.md`](backend/README.md) and [`frontend/README.md`](frontend/README.md) for package-specific setup.
+See also: [`backend/README.md`](backend/README.md), [`frontend/README.md`](frontend/README.md), and [`calling-bot/README.md`](calling-bot/README.md) for package-specific setup.
 
 ## How the encryption works
 
@@ -22,6 +22,7 @@ See also: [`backend/README.md`](backend/README.md) and [`frontend/README.md`](fr
 
 - **Backend**: Node.js, Express, MongoDB/Mongoose, Socket.IO (local dev), JWT auth, `helmet` + rate limiting.
 - **Frontend**: React 18, Vite, React Router, Axios, Socket.IO client, `tweetnacl`.
+- **Calling bot**: Node.js, Socket.IO, JWT auth, no database — a small always-on relay for call/meeting signaling (see [Voice/video calls and group meetings](#voicevideo-calls-and-group-meetings)).
 
 ## Project structure
 
@@ -33,19 +34,40 @@ backend/
   src/
     app.js                    # express app, middleware, routes
     config/db.js               # cached mongoose connection (safe for serverless reuse)
-    models/                    # User (publicKeys[5]), Message (forRecipient/forSender), Attachment
-    controllers/                # auth, users, messages, attachments
+    models/                    # User (publicKeys[5]), Message (forRecipient/forSender), Attachment, CallSignal
+    controllers/                # auth, users, messages, attachments, callSignal
     routes/
     middleware/                 # auth (JWT), upload (multer), rateLimiter
-    socket/index.js             # authenticated Socket.IO wiring (local dev only)
+    socket/index.js             # authenticated Socket.IO wiring (local dev only) — also relays call:*/meeting:*
 frontend/
   src/
     crypto/keys.js              # keypair/key-set generation + sealMessage/unsealMessage
     crypto/keyStorage.js        # local keyring (append-only) + session storage
     context/AuthContext.jsx     # register/login/regenerateKeys/logout
     pages/                      # Register, Login, Chat
-    components/                  # UserList, MessageBubble, AttachmentBubble
+    components/                  # UserList, MessageBubble, AttachmentBubble, CallOverlay, MeetingOverlay
+    hooks/                       # useWebRTCCall (1:1 DM calls), useMeetingCall (group meetings, mesh)
+calling-bot/
+  server.js                   # always-on Socket.IO relay for call:*/meeting:* signaling
+  src/                          # JWT auth middleware, sealed-envelope relay — no database
 ```
+
+## Voice/video calls and group meetings
+
+DM calls and group meetings are peer-to-peer WebRTC (mesh — every participant
+connects directly to every other participant). The server side only ever
+relays X5 sealed-box envelopes (offer/answer/ICE sealed like a chat message);
+it never sees plaintext SDP.
+
+- **Signaling transport**: real-time over Socket.IO when available, with a
+  REST fallback (`/api/call-signals`, 900ms poll) for when it isn't — this is
+  the only transport in production today unless `calling-bot/` is deployed
+  and `VITE_SIGNAL_URL` is set, since the Vercel backend can't hold a
+  persistent connection (see `calling-bot/README.md` for why a separate
+  always-on process exists and how to run one).
+- **1:1 calls**: `frontend/src/hooks/useWebRTCCall.js` + `CallOverlay.jsx`, DM chats only.
+- **Group meetings**: `frontend/src/hooks/useMeetingCall.js` + `MeetingOverlay.jsx`, started from a group chat's header (mesh topology, best for small groups).
+- **TURN**: needed for calls between restrictive NATs/firewalls (e.g. two different mobile carriers), where STUN alone can't find a path and the call fails outright. Set `VITE_TURN_URL`/`VITE_TURN_USERNAME`/`VITE_TURN_CREDENTIAL`; unset means STUN-only, which works on most home networks but not all. `VITE_TURN_URL` is comma-separated so one provider can be reached over UDP 3478, TCP 3478, and TLS 443 — include the 443 entry, it's often the only one that escapes corporate/hotel networks. A TURN relay only forwards DTLS-SRTP packets it cannot decrypt, so a third-party provider does not weaken E2E encryption.
 
 ## Setup
 
@@ -77,9 +99,11 @@ You'll need a MongoDB instance running (local `mongod`, Docker, or Atlas) — po
 | `MONGODB_URI` | — | Mongo connection string, including the database name |
 | `JWT_SECRET` | — | JWT signing secret — set a long random value |
 | `JWT_EXPIRES_IN` | 7d | Token lifetime |
-| `UPLOAD_DIR` | uploads (or `/tmp/uploads` on Vercel) | Where encrypted attachment blobs are stored on disk |
+| `GOOGLE_DRIVE_FOLDER_ID` | — | Shared Drive folder for ciphertext blobs (required) |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | — | Service account email with access to that folder |
+| `GOOGLE_PRIVATE_KEY` | — | Service account PEM (`\n` escapes OK) |
 
-CORS is intentionally wide open (`app.use(cors())`, no origin allowlist) — auth is JWT-bearer, not cookie-based, so there's no CSRF exposure from allowing any origin, and it removes a whole class of "env var didn't match" deployment failures.
+Attachments, avatars, group photos, and stories are stored in **Google Drive** only (no local `uploads/` folder). Ciphertext only — the API never exposes Drive links publicly.
 
 ## API reference
 
@@ -118,5 +142,5 @@ Both `backend/` and `frontend/` deploy as separate Vercel projects (each is its 
 - **Backend** needs `vercel.json` + `api/index.js` (already in the repo) because Vercel only runs stateless serverless functions — `server.js`'s `app.listen()` doesn't work there. `api/index.js` exports the Express app as a request handler and reuses a cached DB connection across warm invocations.
 - **Set environment variables in the Vercel project dashboard** (Settings → Environment Variables) — a local `.env` file is never used by Vercel. At minimum: `MONGODB_URI`, `JWT_SECRET`.
 - `app.set('trust proxy', 1)` is required in `src/app.js` — Vercel's proxy sets `X-Forwarded-For`, and without this `express-rate-limit` throws on every request.
-- **Known limitations on Vercel**: no Socket.IO (serverless functions can't hold persistent connections — messages still send/receive over REST, just without instant push), and attachments are unreliable (Vercel's filesystem is read-only outside `/tmp`, and `/tmp` isn't shared or durable across invocations — a file uploaded in one invocation may be gone by the time a later request tries to download it). A persistent host (Render, Railway, Fly.io, a VPS) or object storage (S3 etc.) would fix both; not implemented here.
+- **Known limitations on Vercel**: no Socket.IO (serverless functions can't hold persistent connections — messages still send/receive over REST, just without instant push). Calls/meetings work the same way via `/api/call-signals` unless `calling-bot/` is deployed separately and `VITE_SIGNAL_URL` is set on the frontend (see [`calling-bot/README.md`](calling-bot/README.md)). Encrypted attachments / avatars / stories use **Google Drive** (service account + Shared Drive folder), not the ephemeral `/tmp` filesystem.
 - If `vercel.json` ever needs a `functions` key, note that Vercel rejects an empty config object (`{}`) — it must contain at least one real property, or omit the key entirely.
