@@ -6,8 +6,3 @@
 	path = frontend
 	url = https://github.com/QuantumLogicsLabs/QuantumChat-Frontend.git
 	branch = main
-[submodule "calling-bot"]
-	path = calling-bot
-	url = https://github.com/QuantumLogicsLabs/Quantum-Call-Bot.git
-	branch = main
-
