@@ -6,3 +6,7 @@
 	path = frontend
 	url = https://github.com/QuantumLogicsLabs/QuantumChat-Frontend.git
 	branch = main
+[submodule "mobileApp"]
+	path = mobileApp
+	url = https://github.com/QuantumLogicsLabs/QuantumChat-MobileApp.git
+	branch = main
