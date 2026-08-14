@@ -10,3 +10,4 @@ coverage/
 .turbo/
 *.tsbuildinfo
 .claude/
+.cursor/
