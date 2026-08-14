@@ -11,3 +11,5 @@ coverage/
 *.tsbuildinfo
 .claude/
 .cursor/
+.vscode/
+.vscode
