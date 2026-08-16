@@ -12,3 +12,5 @@ coverage/
 .claude/
 .cursor/
 QuantumChat.txt
+.vscode/
+.vscode
