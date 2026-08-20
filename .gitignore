@@ -13,3 +13,5 @@ coverage/
 .cursor/
 .vscode/
 .vscode
+.dart_tool/
+.idea/
