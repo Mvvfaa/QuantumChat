@@ -14,3 +14,5 @@ coverage/
 QuantumChat.txt
 .vscode/
 .vscode
+.dart_tool/
+.idea/
