@@ -16,3 +16,4 @@ QuantumChat.txt
 .vscode
 .dart_tool/
 .idea/
+.nvmrc
