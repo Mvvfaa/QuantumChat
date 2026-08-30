@@ -1,0 +1,92 @@
+---
+name: "📚 Documentation Issue"
+description: "Report missing, incorrect, or unclear documentation — including SLaNg API docs, guides, or README files."
+title: "docs(<scope>): <short description>"
+labels: ["documentation", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Good documentation is a first-class contribution in this project.
+        Use this template to report anything that is missing, wrong, or hard to understand —
+        from a single function's `.md` file to a broken setup guide.
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: "Type of documentation affected"
+      multiple: false
+      options:
+        - "SLaNg API docs (docs/explaination/SLaNg-Basic/)"
+        - "SLaNg API docs (docs/explaination/SLaNg-Advanced/)"
+        - "SLaNg API docs (docs/explaination/SLaNg-Converter/)"
+        - "SLaNg API docs (docs/explaination/SLaNg-helpers/)"
+        - "Architecture doc (ARCHITECTURE.md / ARCHITECTURE.MD)"
+        - "User guide (docs/GUIDE.md)"
+        - "Root README.md"
+        - "Submodule README (specify which in description)"
+        - "CONTRIBUTING.md"
+        - "Setup script instructions"
+        - "Code comments / JSDoc / Python docstrings"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: "File or section"
+      description: "Path to the file or a link to the specific section that has the issue."
+      placeholder: "calculussolver/slang/docs/explaination/SLaNg-Advanced/Chain Rule/chainRuleDifferentiate.md"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: "What is wrong?"
+      multiple: true
+      options:
+        - "Content is missing entirely"
+        - "Content is incorrect or outdated"
+        - "Content is unclear or hard to follow"
+        - "Code example is broken or does not run"
+        - "Typo or grammatical error"
+        - "Broken link"
+        - "Formatting problem"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: "Describe the documentation problem clearly. Quote the problematic text if applicable."
+      placeholder: |
+        The `chainRuleDifferentiate.md` file shows the function signature but does not
+        include an example with a composite trigonometric function. The existing polynomial
+        example is helpful but insufficient for users working with trig.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: "Suggested improvement"
+      description: "If you know what the correct or improved content should be, share it here."
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: "Contribution"
+      options:
+        - label: "I am willing to open a PR to fix this documentation issue myself."
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "Before submitting"
+      options:
+        - label: "I checked that this documentation issue has not already been reported."
+          required: true

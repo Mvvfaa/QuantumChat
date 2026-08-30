@@ -1,0 +1,77 @@
+name: Update submodules
+
+on:
+  # Run every 5 minutes.
+  schedule:
+    - cron: '*/05 * * * *'
+
+  # Allow maintainers to run the update immediately when needed.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  # Prevent overlapping runs from clobbering each other on the same branch.
+  group: update-submodules
+  cancel-in-progress: false
+
+jobs:
+  update-submodules:
+    name: Update submodule pointers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # A PAT is required to push directly to main when branch protection
+          # is enabled. If your main branch has no protection rules, you can
+          # replace this with ${{ github.token }}.
+          token: ${{ github.token }}
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Configure git bot identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Ignore submodule worktree dirt
+        run: |
+          # Only track gitlink pointer changes, not file-level changes inside
+          # each submodule's working tree (generated files, platform diffs, etc.)
+          git config diff.ignoreSubmodules dirty
+
+          while read -r key path; do
+            name="${key#submodule.}"
+            name="${name%.path}"
+            git config "submodule.${name}.ignore" dirty
+            echo "Configured submodule '$name' at '$path' to ignore dirty worktree"
+          done < <(git config --file .gitmodules --get-regexp '^submodule\..*\.path$')
+
+      - name: Reset submodule working trees
+        run: |
+          git submodule sync --recursive
+          git submodule foreach --recursive 'git reset --hard && git clean -ffd'
+
+      - name: Update submodules to latest remote commits
+        run: |
+          git submodule update --init --recursive --remote
+
+          # Strip any files modified inside submodules during checkout — the
+          # parent repo only stores the gitlink pointer, nothing else.
+          git submodule foreach --recursive 'git reset --hard && git clean -ffd'
+
+      - name: Commit and push if pointers changed
+        run: |
+          # Stage only the three submodule gitlink entries.
+          git add frontend backend calculussolver
+
+          if git diff --cached --quiet; then
+            echo "No submodule pointer changes detected — nothing to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: update git submodule pointers [skip ci]"
+          git push origin main

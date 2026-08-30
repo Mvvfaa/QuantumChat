@@ -1,0 +1,40 @@
+---
+name: "🗒️ Blank Issue"
+description: "For anything that doesn't fit the Bug Report, Feature Request, or Documentation templates."
+title: "<type>(<scope>): <short description>"
+labels: ["needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template only if your issue genuinely doesn't fit one of the other categories.
+        If you're unsure, a Bug Report or Feature Request is probably more appropriate.
+
+        For general questions or usage help, please use [Discussions](https://github.com/QuantumLogicsLabs/CalculusRuntime/discussions) instead.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: "Describe your issue or proposal in as much detail as you can."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Additional context"
+      description: "Anything else that would help maintainers understand the issue."
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "Before submitting"
+      options:
+        - label: "I searched existing issues and this is not a duplicate."
+          required: true
+        - label: "This is not a security vulnerability (those go to Security Advisories)."
+          required: true
+        - label: "This is not a general question (those go to Discussions)."
+          required: true
