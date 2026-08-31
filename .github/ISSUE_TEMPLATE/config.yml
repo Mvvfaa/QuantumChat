@@ -1,0 +1,12 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 🔒 Security Vulnerability
+    url: https://github.com/QuantumLogicsLabs/CalculusRuntime/security/advisories/new
+    about: >
+      Please report security vulnerabilities privately via GitHub Security Advisories.
+      Do NOT open a public issue. See SECURITY.md for full details.
+  - name: 💬 General Question / Discussion
+    url: https://github.com/QuantumLogicsLabs/CalculusRuntime/discussions
+    about: >
+      For questions about how CalculusRuntime works, SLaNg usage, or architecture —
+      start a Discussion rather than an Issue.

@@ -1,0 +1,99 @@
+---
+name: "✨ Feature Request"
+description: "Propose a new calculus operation, ML capability, UI feature, or API improvement."
+title: "feat(<scope>): <short description>"
+labels: ["enhancement", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to propose an improvement to CalculusRuntime.
+        Please describe your idea as clearly as you can so maintainers and other contributors
+        can understand the motivation and scope before any work begins.
+
+        > **Large or cross-cutting features** (e.g. a new calculus domain in SLaNg, a new ML model
+        > architecture, a new frontend section) should be discussed here before a PR is opened.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: "Target component"
+      description: "Which part of the project would this feature affect?"
+      multiple: true
+      options:
+        - "SLaNg — symbolic engine"
+        - "SLaNg — LaTeX ↔ SLaNg converter"
+        - "SLaNg — SvelteKit demo website"
+        - "CalculusSolver — data pipeline"
+        - "CalculusSolver — training"
+        - "CalculusSolver — inference engine"
+        - "CalculusSolver — React website"
+        - "Frontend (main React app)"
+        - "Backend (API)"
+        - "Setup scripts"
+        - "Documentation"
+        - "CI / tooling"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problem this solves"
+      description: |
+        What is the limitation or gap you are running into?
+        Describe it from the perspective of a user or developer trying to do something.
+      placeholder: |
+        There is currently no way to compute the Fourier series of a function using SLaNg.
+        Users who need this have to implement it outside the library and cannot benefit
+        from SLaNg's simplification or LaTeX conversion.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Proposed solution"
+      description: |
+        Describe the feature you would like to see. Be as specific as possible —
+        include proposed function signatures, UI wireframes, or API shapes if you have them.
+      placeholder: |
+        Add a `fourierSeries(expr, variable, n)` function to `src/core/advanced.js` that
+        returns an equation object representing the first n terms of the Fourier series.
+        A corresponding `.md` doc file would go in `docs/explaination/SLaNg-Advanced/Fourier Series/`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternatives considered"
+      description: "Are there other ways to solve this? Why is your proposed solution preferred?"
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: "Are you willing to implement this?"
+      options:
+        - "Yes — I plan to open a PR for this."
+        - "Partially — I can help but would need guidance."
+        - "No — I'm proposing it for someone else to pick up."
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional context"
+      description: "Links to relevant papers, prior art, related issues, or screenshots."
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "Before submitting"
+      options:
+        - label: "I searched existing issues and this has not already been proposed."
+          required: true
+        - label: "This is a feature request, not a bug report."
+          required: true

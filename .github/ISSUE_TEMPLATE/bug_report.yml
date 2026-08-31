@@ -1,0 +1,119 @@
+---
+name: "🐛 Bug Report"
+description: "Something is broken in CalculusRuntime, SLaNg, the solver, or the frontend."
+title: "fix(<scope>): <short description>"
+labels: ["bug", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in as much detail as you can —
+        the more context you provide, the faster we can reproduce and fix the issue.
+
+        > **Security vulnerability?** Do not file it here.
+        > Use [GitHub Security Advisories](https://github.com/QuantumLogicsLabs/CalculusRuntime/security/advisories/new) instead — see [SECURITY.md](../SECURITY.md).
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: "Affected component"
+      description: "Which part of the project is broken?"
+      multiple: false
+      options:
+        - "SLaNg — symbolic engine (src/core, src/math, src/utils)"
+        - "SLaNg — LaTeX ↔ SLaNg converter (src/convertor.js)"
+        - "SLaNg — SvelteKit demo website"
+        - "CalculusSolver — data pipeline"
+        - "CalculusSolver — training (model_trainer.py)"
+        - "CalculusSolver — inference engine"
+        - "CalculusSolver — evaluation (evaluate_model.py)"
+        - "CalculusSolver — tokenizer"
+        - "CalculusSolver — React website"
+        - "Frontend (main React app)"
+        - "Backend (API)"
+        - "Setup scripts (setup.sh / setup.ps1)"
+        - "Other / unsure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Bug description"
+      description: "A clear and concise description of what the bug is."
+      placeholder: |
+        When I call `chainRuleDifferentiate(...)` with a composite polynomial,
+        the result is missing the outer derivative factor.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "Steps to reproduce"
+      description: "Provide the minimal code or sequence of actions that reliably triggers the bug."
+      render: javascript
+      placeholder: |
+        const { chainRuleDifferentiate } = require('./src/core/advanced');
+        const expr = ...; // build expression
+        const result = chainRuleDifferentiate(expr);
+        console.log(result); // unexpected output
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected behaviour"
+      description: "What did you expect to happen?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Actual behaviour"
+      description: "What actually happened? Include any error messages, stack traces, or incorrect output."
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: slang-version
+    attributes:
+      label: "SLaNg version (if applicable)"
+      description: "Run `npm list slang` or check package.json."
+      placeholder: "e.g. 1.2.0"
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment"
+      description: "Fill in all that apply."
+      value: |
+        - OS:
+        - Node.js version:
+        - Python version:
+        - Browser (if UI-related):
+        - Relevant dependency versions:
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional context"
+      description: "Screenshots, related issues, links to relevant docs, or anything else that might help."
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "Before submitting"
+      options:
+        - label: "I searched existing issues and this is not a duplicate."
+          required: true
+        - label: "I am not reporting a security vulnerability (those go to Security Advisories)."
+          required: true
+        - label: "I have included a minimal reproduction case."
+          required: true
