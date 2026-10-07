@@ -140,6 +140,7 @@ Local dev only (`server.js`) — connect with `{ auth: { token: <jwt> } }`. Each
 Both `backend/` and `frontend/` deploy as separate Vercel projects (each is its own GitHub repo, per `.gitmodules`).
 
 - **Backend** needs `vercel.json` + `api/index.js` (already in the repo) because Vercel only runs stateless serverless functions — `server.js`'s `app.listen()` doesn't work there. `api/index.js` exports the Express app as a request handler and reuses a cached DB connection across warm invocations.
+- The backend root URL (`/`) rewrites to `/api/health`, since it is an API deployment rather than a frontend.
 - **Set environment variables in the Vercel project dashboard** (Settings → Environment Variables) — a local `.env` file is never used by Vercel. At minimum: `MONGODB_URI`, `JWT_SECRET`.
 - `app.set('trust proxy', 1)` is required in `src/app.js` — Vercel's proxy sets `X-Forwarded-For`, and without this `express-rate-limit` throws on every request.
 - **Known limitations on Vercel**: no Socket.IO (serverless functions can't hold persistent connections — messages still send/receive over REST, just without instant push). Calls/meetings work the same way via `/api/call-signals` unless `calling-bot/` is deployed separately and `VITE_SIGNAL_URL` is set on the frontend (see [`calling-bot/README.md`](calling-bot/README.md)). Encrypted attachments / avatars / stories use **Google Drive** (service account + Shared Drive folder), not the ephemeral `/tmp` filesystem.
